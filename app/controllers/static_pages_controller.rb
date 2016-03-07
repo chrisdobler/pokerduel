@@ -1,6 +1,10 @@
 class StaticPagesController < ApplicationController
 
+	@highs
+
 	def gameboard
+
+		players = 2
 		file = File.open("db/hands_db.txt", "r")
 		p1 = [] # array of all hands for player 1
 		p2 = []
@@ -12,8 +16,7 @@ class StaticPagesController < ApplicationController
 		i = 0
 		@contents = []
 
-		high_p1 = [] # array of highest hand for each turn
-		high_p2 = [] # array of highest hand for each turn
+		@highs = {1=>[],2=>[]} # array of highest hand for each turn
 
 		dups_p1 = [] # array of duplicates for each hand
 		dups_p2 = []
@@ -31,9 +34,9 @@ class StaticPagesController < ApplicationController
 		  p2_n.push get_number_value_for p2[i]
 
 	  #check for highest number card
-			high_p1.push get_highest_from p1_n[i]
-			high_p2.push get_highest_from p2_n[i]
-			if high_p1[i] > high_p2[i] then scores[i]=1 else scores[i]=2 end
+			@highs[1].push get_highest_from p1_n[i]
+			@highs[2].push get_highest_from p2_n[i]
+			scores[i] = get_highest_for(i)
 
 		#update the duplicate table
 			dups_p1.push get_duplicate_table_for p1_n[i]
@@ -56,6 +59,10 @@ class StaticPagesController < ApplicationController
 		@contents = scores
 	end
 
+#checks which player wins for a given turn
+	def get_highest_for(turn)
+		if @highs[1][turn] > @highs[2][turn] then 1 else 2 end
+	end
 	def get_pairs_for duplicate_hand_table
 			pairs_hand = {:pair => 0, :triple => 0}
 			duplicate_hand_table.each do |k,v|
