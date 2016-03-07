@@ -67,10 +67,24 @@ class StaticPagesController < ApplicationController
 				else scores[i] = get_highest_for i end
 			end
 
+		#update score for flushes
+			if is_flush? p1[i] 
+				if !is_flush? p2[i] then scores[i] = 1
+				else scores[i] = get_highest_for i end
+			end
+			if is_flush? p2[i] 
+				if !is_flush? p1[i] then scores[i] = 2
+				else scores[i] = get_highest_for i end
+			end
+
 
 			i = i+1
 		end
 		@contents = scores
+	end
+
+	def is_flush?(hand)
+	  hand.all? { |x| x.last == hand.first.last }
 	end
 
 #checks which player wins for a given turn
