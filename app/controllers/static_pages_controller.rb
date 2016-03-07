@@ -18,6 +18,9 @@ class StaticPagesController < ApplicationController
 		dups_p1 = [] # array of duplicates for each hand
 		dups_p2 = []
 
+		pairs_p1 = [] # array of pairs hashes for each hand labeled as :pair, and :triple
+		pairs_p2 = []
+
    	while !file.eof?
 			line = file.readline
 			cards = line.split(" ")
@@ -36,9 +39,22 @@ class StaticPagesController < ApplicationController
 			dups_p1.push get_duplicate_table_for p1_n[i]
 			dups_p2.push get_duplicate_table_for p2_n[i]
 
+		#check for pairs, double pairs and triples
+			pairs_p1.push get_pairs_for dups_p1[i]
+			pairs_p2.push get_pairs_for dups_p2[i]
+
 		   i = i+1
 		end
 		@contents = scores
+	end
+
+	def get_pairs_for duplicate_hand_table
+			pairs_hand = {:pair => 0, :triple => 0}
+			duplicate_hand_table.each do |k,v|
+				if v == 2 then pairs_hand[:pair] += 1 end
+				if v == 3 then pairs_hand[:triple] += 1 end
+			end 
+			pairs_hand
 	end
 
 	def get_duplicate_table_for hand
