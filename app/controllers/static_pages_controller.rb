@@ -24,6 +24,9 @@ class StaticPagesController < ApplicationController
 		pairs_p1 = [] # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
 		pairs_p2 = []
 
+		straights_p1 = [] # array of straights
+		straights_p2 = []
+
    	while !file.eof?
 			line = file.readline
 			cards = line.split(" ")
@@ -54,7 +57,18 @@ class StaticPagesController < ApplicationController
 			if pairs_p1[i][:triple] > pairs_p2[i][:triple] then scores[i]=1 end
 			if pairs_p2[i][:triple] > pairs_p1[i][:triple] then scores[i]=2 end
 
-		   i = i+1
+		#update score for straight matches
+			if is_straight? p1_n[i] 
+				if !is_straight? p2_n[i] then scores[i] = 1
+				else scores[i] = get_highest_for i end
+			end
+			if is_straight? p2_n[i] 
+				if !is_straight? p1_n[i] then scores[i] = 2
+				else scores[i] = get_highest_for i end
+			end
+
+
+			i = i+1
 		end
 		@contents = scores
 	end
@@ -63,6 +77,22 @@ class StaticPagesController < ApplicationController
 	def get_highest_for(turn)
 		if @highs[1][turn] > @highs[2][turn] then 1 else 2 end
 	end
+
+	def is_straight?(hand)    
+	  sorted = hand.uniq.sort
+	  # @contents = sorted
+	  if sorted.length < 5
+	    # cant form a straight with duplicates
+	    false
+	  else
+	    if sorted.first + 4 == sorted.last then true
+	    elsif sorted[4] == 14 then 
+	    	sorted.unshift(1).pop
+	    	if sorted.first + 4 == sorted.last then true end
+	    end
+	  end
+	end
+
 	def get_pairs_for duplicate_hand_table
 			pairs_hand = {:pair => 0, :triple => 0}
 			duplicate_hand_table.each do |k,v|
