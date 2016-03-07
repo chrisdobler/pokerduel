@@ -8,11 +8,13 @@ class StaticPagesController < ApplicationController
 		file = File.open("db/hands_db.txt", "r")
 		p1 = [] # array of all hands for player 1
 		p2 = []
+		hands = {} 
 
 		p1_n = [] # array of numerical values of cards
 		p2_n = []
 
 		scores = []
+		reasons = [] #array of reasons for the score outcome with each turn. format: includes: flush
 		i = 0
 		@contents = []
 
@@ -23,6 +25,7 @@ class StaticPagesController < ApplicationController
 
 		pairs_p1 = [] # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
 		pairs_p2 = []
+		pairs = {}
 
 		straights_p1 = [] # array of straights
 		straights_p2 = []
@@ -32,6 +35,10 @@ class StaticPagesController < ApplicationController
 			cards = line.split(" ")
 			p1.push cards[0..4]
 			p2.push cards[5..9]
+
+#temp
+			hands[1] = p1
+			hands[2] = p2
 
 		  p1_n.push get_number_value_for p1[i]
 		  p2_n.push get_number_value_for p2[i]
@@ -48,6 +55,10 @@ class StaticPagesController < ApplicationController
 		#check for pairs, double pairs and triples
 			pairs_p1.push get_pairs_for dups_p1[i]
 			pairs_p2.push get_pairs_for dups_p2[i]
+
+#temp
+			pairs[1] = pairs_p1
+			pairs[2] = pairs_p2
 
 		#update score for pairs
 			if pairs_p1[i][:pair] > pairs_p2[i][:pair] then scores[i]=1 end
@@ -80,6 +91,26 @@ class StaticPagesController < ApplicationController
 
 			i = i+1
 		end
+
+	#loop to handle scoring for each set of hands
+		i = 0
+		while i < hands[1].count
+			
+	#updates score for full house
+			p=1
+			while p <= players
+				# @contents.push pairs[p][i][:pair]
+				if pairs[p][i][:triple] == 1 && pairs[p][i][:pair] == 1 then
+					if reasons[i] != "full_house" then
+						reasons[i] = "full_house"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+			i = i+1
+		end
+
 		@contents = scores
 	end
 
