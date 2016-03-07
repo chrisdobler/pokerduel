@@ -21,7 +21,7 @@ class StaticPagesController < ApplicationController
 		dups_p1 = [] # array of duplicates for each hand
 		dups_p2 = []
 
-		pairs_p1 = [] # array of pairs hashes for each hand labeled as :pair, and :triple
+		pairs_p1 = [] # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
 		pairs_p2 = []
 
    	while !file.eof?
@@ -68,6 +68,7 @@ class StaticPagesController < ApplicationController
 			duplicate_hand_table.each do |k,v|
 				if v == 2 then pairs_hand[:pair] += 1 end
 				if v == 3 then pairs_hand[:triple] += 1 end
+				if v == 4 then pairs_hand[:quad] += 1 end
 			end 
 			pairs_hand
 	end
