@@ -43,6 +43,14 @@ class StaticPagesController < ApplicationController
 			pairs_p1.push get_pairs_for dups_p1[i]
 			pairs_p2.push get_pairs_for dups_p2[i]
 
+		#update score for pairs
+			if pairs_p1[i][:pair] > pairs_p2[i][:pair] then scores[i]=1 end
+			if pairs_p2[i][:pair] > pairs_p1[i][:pair] then scores[i]=2 end
+
+		#update score for triples
+			if pairs_p1[i][:triple] > pairs_p2[i][:triple] then scores[i]=1 end
+			if pairs_p2[i][:triple] > pairs_p1[i][:triple] then scores[i]=2 end
+
 		   i = i+1
 		end
 		@contents = scores
