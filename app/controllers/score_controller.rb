@@ -14,6 +14,7 @@ class ScoreController < ApplicationController
 
 		@highs = {} # array of highest hand for each turn
 		@pairs = {} # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
+		@pairs_highest = {} #array of the highest number for each pair, triple and quad match seperated by hash
 
 		p=1
 		while p <= @players
@@ -21,6 +22,7 @@ class ScoreController < ApplicationController
 			@hands_n[p] = []
 			@highs[p] = []
 			@pairs[p] = []
+			@pairs_highest[p] = []
 			p +=1
 		end
 
@@ -39,8 +41,8 @@ class ScoreController < ApplicationController
 			@highs[2].push get_highest_from @hands_n[2][i]
 
 		#check for pairs, double pairs and triples
-			@pairs[1].push get_pairs_for get_duplicate_table_for @hands_n[1][i]
-			@pairs[2].push get_pairs_for get_duplicate_table_for @hands_n[2][i]
+			@pairs[1].push get_pairs_for(get_duplicate_table_for(@hands_n[1][i]),1,i)
+			@pairs[2].push get_pairs_for(get_duplicate_table_for(@hands_n[2][i]),2,i)
 
 			i = i+1
 		end
@@ -62,7 +64,7 @@ class ScoreController < ApplicationController
 		  totals[v] += 1
 		end
 
-		[@reasons, @scores, @hands, @hands_n, totals]
+		[@reasons, @scores, @hands, @pairs_highest, totals]
 	end
 
 	def compare(i,max=10)
@@ -84,7 +86,18 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "pair" then
 							@reasons[i] = "pair"
 							@scores[i] = p
-						else self.compare(i,max=1) end
+						else 
+							beat = false
+							pl = 1
+							while pl <= @players
+								if @pairs_highest[pl][i][:pair] > @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 1 then beat = true end
+								# if @pairs_highest[pl][i][:pair] == @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 1 then self.compare(i,max=1) end
+								pl +=1
+							end 
+							if beat == false then
+								@scores[i] = p
+							end
+						end
 					end
 					p +=1
 				end
@@ -98,7 +111,18 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "two_pair" then
 							@reasons[i] = "two_pair"
 							@scores[i] = p
-						else self.compare(i,max=2) end
+						else
+							beat = false
+							pl = 1
+							while pl <= @players
+								if @pairs_highest[pl][i][:pair] > @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 2 then beat = true end
+								# if @pairs_highest[pl][i][:pair] == @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 2 then self.compare(i,max=1) end
+								pl +=1
+							end 
+							if beat == false then
+								@scores[i] = p
+							end
+						end
 					end
 					p +=1
 				end
@@ -241,12 +265,22 @@ class ScoreController < ApplicationController
 		end
 	end
 
-	def get_pairs_for duplicate_hand_table
+	def get_pairs_for duplicate_hand_table, player, turn
 			pairs_hand = {:pair => 0, :triple => 0, :quad => 0}
+			@pairs_highest[player][turn] = {:pair => 0, :triple => 0, :quad => 0}
 			duplicate_hand_table.each do |k,v|
-				if v == 2 then pairs_hand[:pair] += 1 end
-				if v == 3 then pairs_hand[:triple] += 1 end
-				if v >= 4 then pairs_hand[:quad] += 1 end
+				if v == 2 then 
+					pairs_hand[:pair] += 1 
+					if k > @pairs_highest[player][turn][:pair] then @pairs_highest[player][turn][:pair] = k end
+				end
+				if v == 3 then 
+					pairs_hand[:triple] += 1 
+					if k > @pairs_highest[player][turn][:triple] then @pairs_highest[player][turn][:triple] = k end
+				end
+				if v >= 4 then 
+					pairs_hand[:quad] += 1 
+					if k > @pairs_highest[player][turn][:quad] then @pairs_highest[player][turn][:quad] = k end
+				end
 			end 
 			pairs_hand
 	end
