@@ -133,10 +133,22 @@ class ScoreController < ApplicationController
 				p +=1
 			end
 
+		#updates score for straight flush: All cards are consecutive values of same suit.
+			p=1
+			while p <= players
+				if is_flush? hands[p][i] and is_straight? hands_n[p][i]
+					if reasons[i] != "straight_flush" then
+						reasons[i] = "straight_flush"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
 			i = i+1
 		end
 
-		@contents = reasons
+		@contents = [reasons, scores]
 	end
 
 	def is_flush?(hand)
