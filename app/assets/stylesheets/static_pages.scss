@@ -1,3 +1,134 @@
 // Place all the styles related to the StaticPages controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+.title
+{
+  text-align: center;
+}
+
+.header_shelf{
+  float: left;
+  position: relative;
+  width: 400px;
+}
+
+.hand_shelf{
+  position: relative;
+  width: 1200px;
+}
+
+.player_hand{
+  float: left;
+  position: relative;
+  width: 400px;
+  height: 220px;
+}
+
+.hand_data{
+  float: left;
+  position: relative;
+  width: 200px; 
+  text-align: center;
+}
+
+.card0{left: 0px;}
+.card1{left: 55px;}
+.card2{left: 110px;}
+.card3{left: 165px;}
+.card4{left: 220px;}
+
+figure {
+  margin: 0 auto;  
+}
+
+.PlayingCard {
+  display: block;
+  position: absolute;
+  border: 1px solid #000;
+  border-radius: .3em;
+  float: left;
+  background: white;
+}
+
+.PlayingCard, .PlayingCard__symbols {
+  height: 12em;
+  width: 8em;
+}
+
+.PlayingCard__caption {
+  /* only for screen readers */
+  /* http://css-tricks.com/places-its-tempting-to-use-display-none-but-dont/ */
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+
+.PlayingCard__half {
+  position: absolute;
+  top: .3em;
+  right: auto;
+  bottom: auto;
+  left: .3em;
+}
+
+.PlayingCard__half-bottom {
+  top: auto;
+  right: .3em;
+  bottom: .3em;
+  left: auto;
+  -webkit-transform: rotate(180deg); /* stupid WebKit / Blink :( */
+  transform: rotate(180deg);
+}
+
+.PlayingCard__rank {
+  font-size: larger;
+  font-weight: bolder;
+}
+
+.PlayingCard__symbols {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+}
+
+.PlayingCard__suit {
+  text-align: center;
+  font-size: 300%;
+}
+
+.PlayingCard__symbols-rank1,
+.PlayingCard__symbols-rank2,
+.PlayingCard__symbols-rank3 {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.PlayingCard__symbols-rank1 .PlayingCard__suit,
+.PlayingCard__symbols-rank11 .PlayingCard__suit,
+.PlayingCard__symbols-rank12 .PlayingCard__suit,
+.PlayingCard__symbols-rank13 .PlayingCard__suit {
+  font-size: 600%;
+}
+
+.PlayingCard__symbols-rank4 .PlayingCard__suit,
+.PlayingCard__symbols-rank5 .PlayingCard__suit,
+.PlayingCard__symbols-rank6 .PlayingCard__suit {
+  flex-basis: 50%;
+}
+
+.PlayingCard__suit-hearts,
+.PlayingCard__suit-diamonds {
+  color: red;
+}
+
+.PlayingCard__suit-clubs,
+.PlayingCard__suit-spades {
+  color: black;
+}
