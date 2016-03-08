@@ -24,4 +24,11 @@ module StaticPagesHelper
 			'hearts'
 		end
 	end
+
+	def ten_fixer var
+		if var == "T"
+			var = 10
+		end
+		var
+	end
 end
