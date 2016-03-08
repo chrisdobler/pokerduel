@@ -1,8 +1,5 @@
 class ScoreController < ApplicationController
 
-	@highs
-	@contents
-
 	def parse hands_db
 		@players = 2
 		file = File.open(hands_db, "r")
@@ -16,7 +13,6 @@ class ScoreController < ApplicationController
 		@contents = []
 
 		@highs = {} # array of highest hand for each turn
-
 		@pairs = {} # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
 
 		p=1
@@ -50,11 +46,15 @@ class ScoreController < ApplicationController
 		end
 	end
 
-	def evaluate
+	def evaluate()
 
-#loop to handle scoring for each set of hands
+	#loop to handle scoring for each set of hands
 		i = 0
 		while i < @hands[1].count
+			compare(i,max=10)
+			i = i+1
+		end
+
 	#tally scores
 		totals = Hash.new(0)
 		# iterate over the array, counting duplicate entries
@@ -62,127 +62,148 @@ class ScoreController < ApplicationController
 		  totals[v] += 1
 		end
 
+		[@reasons, @scores, @hands, @hands_n, totals]
+	end
+
+	def compare(i,max=10)
 		#set defaults
-			@reasons[i] = "unscored"
+			@reasons[i] = "tie"
 			@scores[i] = 0
 
 		#update score for highest card
-			@reasons[i] = "highest"
-			@scores[i] = get_highest_for(i)
+			if max > 0 then
+				@reasons[i] = "highest"
+				@scores[i] = get_highest_for(i)
+			end
 
 		#update score for pairs
-			p=1
-			while p <= @players
-				if @pairs[p][i][:pair] == 1 then
-					if @reasons[i] != "pair" then
-						@reasons[i] = "pair"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 1 then
+				p=1
+				while p <= @players
+					if @pairs[p][i][:pair] == 1 then
+						if @reasons[i] != "pair" then
+							@reasons[i] = "pair"
+							@scores[i] = p
+						else self.compare(i,max=1) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#updates score for two pairs
-			p=1
-			while p <= @players
-				if @pairs[p][i][:pair] == 2 then
-					if @reasons[i] != "two_pair" then
-						@reasons[i] = "two_pair"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 2 then
+				p=1
+				while p <= @players
+					if @pairs[p][i][:pair] == 2 then
+						if @reasons[i] != "two_pair" then
+							@reasons[i] = "two_pair"
+							@scores[i] = p
+						else self.compare(i,max=2) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#update score for 3ofaKind
-			p=1
-			while p <= @players
-				if @pairs[p][i][:triple] == 1 then
-					if @reasons[i] != "3_of_kind" then
-						@reasons[i] = "3_of_kind"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 3 then
+				p=1
+				while p <= @players
+					if @pairs[p][i][:triple] == 1 then
+						if @reasons[i] != "3_of_kind" then
+							@reasons[i] = "3_of_kind"
+							@scores[i] = p
+						else self.compare(i,max=3) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 
 		#update score for straight matches
-			p=1
-			while p <= @players
-				if is_straight? @hands_n[p][i] 
-					if @reasons[i] != "straight" then
-						@reasons[i] = "straight"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 4 then
+				p=1
+				while p <= @players
+					if is_straight? @hands_n[p][i] 
+						if @reasons[i] != "straight" then
+							@reasons[i] = "straight"
+							@scores[i] = p
+						else self.compare(i,max=4) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#update score for flushes: All cards of the same suit.
-			p=1
-			while p <= @players
-				if is_flush? @hands[p][i]
-					if @reasons[i] != "flush" then
-						@reasons[i] = "flush"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 5 then
+				p=1
+				while p <= @players
+					if is_flush? @hands[p][i]
+						if @reasons[i] != "flush" then
+							@reasons[i] = "flush"
+							@scores[i] = p
+						else self.evaluate(i,max=5) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#updates score for full house
-			p=1
-			while p <= @players
-				if @pairs[p][i][:triple] == 1 && @pairs[p][i][:pair] == 1 then
-					if @reasons[i] != "full_house" then
-						@reasons[i] = "full_house"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 6 then
+				p=1
+				while p <= @players
+					if @pairs[p][i][:triple] == 1 && @pairs[p][i][:pair] == 1 then
+						if @reasons[i] != "full_house" then
+							@reasons[i] = "full_house"
+							@scores[i] = p
+						else self.evaluate(i,max=6) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#updates score for 4 of a kind
-			p=1
-			while p <= @players
-				if @pairs[p][i][:quad] == 1 then
-					if @reasons[i] != "4_of_kind" then
-						@reasons[i] = "4_of_kind"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 7 then
+				p=1
+				while p <= @players
+					if @pairs[p][i][:quad] == 1 then
+						if @reasons[i] != "4_of_kind" then
+							@reasons[i] = "4_of_kind"
+							@scores[i] = p
+						else self.evaluate(i,max=7) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#updates score for straight flush: All cards are consecutive values of same suit.
-			p=1
-			while p <= @players
-				if is_flush? @hands[p][i] and is_straight? @hands_n[p][i]
-					if @reasons[i] != "straight_flush" then
-						@reasons[i] = "straight_flush"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 8 then
+				p=1
+				while p <= @players
+					if is_flush? @hands[p][i] and is_straight? @hands_n[p][i]
+						if @reasons[i] != "straight_flush" then
+							@reasons[i] = "straight_flush"
+							@scores[i] = p
+						else self.evaluate(i,max=8) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
 		#updates score for royal flush: Ten, Jack, Queen, King, Ace, in same suit.
-			p=1
-			while p <= @players
-				if is_flush? @hands[p][i] and is_royal? @hands_n[p][i]
-					if @reasons[i] != "royal_flush" then
-						@reasons[i] = "royal_flush"
-						@scores[i] = p
-					else @scores[i] = get_highest_for(i) end
+			if max > 9 then
+				p=1
+				while p <= @players
+					if is_flush? @hands[p][i] and is_royal? @hands_n[p][i]
+						if @reasons[i] != "royal_flush" then
+							@reasons[i] = "royal_flush"
+							@scores[i] = p
+						else self.evaluate(i,max=9) end
+					end
+					p +=1
 				end
-				p +=1
 			end
 
-			i = i+1
-		end
 
-		@contents = [@reasons, @scores]
 	end
 
 	def is_flush?(hand)
