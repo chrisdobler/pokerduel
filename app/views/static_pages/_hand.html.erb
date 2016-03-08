@@ -1,0 +1,20 @@
+<div class="player_hand">
+	<% i = 0 %>
+	<% while i < 5 %>
+	  <figure playing-card="" rank="rank" suit="suit" class="PlayingCard ng-isolate-scope card<%=i%>">
+      <figcaption class="PlayingCard__caption ng-binding">A of ♥</figcaption>
+      <div class="PlayingCard__half" aria-hidden="true">
+        <label class="PlayingCard__rank ng-binding"><%=hand[i].first%></label>
+      </div>
+      <div class="PlayingCard__half PlayingCard__half-bottom" aria-hidden="true">
+        <label class="PlayingCard__rank ng-binding"><%=hand[i].first%></label>
+      </div>
+      <figure class="PlayingCard__symbols PlayingCard__symbols-rank1" ng-class="'PlayingCard__symbols-rank' + rank.value">
+        <!-- ngRepeat: symbol in symbols track by $index --><figure class="PlayingCard__suit ng-binding ng-scope PlayingCard__suit-<%=to_suit_name(hand[i].last) %>" ng-repeat="symbol in symbols track by $index" ng-class="'PlayingCard__suit-' + suit.name">
+          <%= to_suit(hand[i].last) %>
+        </figure><!-- end ngRepeat: symbol in symbols track by $index -->
+      </figure>
+    </figure>
+   	<% i = i+1 %>
+<% end %>
+</div>
