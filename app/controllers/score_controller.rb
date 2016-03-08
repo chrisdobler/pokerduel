@@ -155,7 +155,7 @@ class ScoreController < ApplicationController
 			duplicate_hand_table.each do |k,v|
 				if v == 2 then pairs_hand[:pair] += 1 end
 				if v == 3 then pairs_hand[:triple] += 1 end
-				if v == 4 then pairs_hand[:quad] += 1 end
+				if v >= 4 then pairs_hand[:quad] += 1 end
 			end 
 			pairs_hand
 	end
