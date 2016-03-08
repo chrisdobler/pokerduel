@@ -161,6 +161,18 @@ class ScoreController < ApplicationController
 				p +=1
 			end
 
+		#updates score for royal flush: Ten, Jack, Queen, King, Ace, in same suit.
+			p=1
+			while p <= @players
+				if is_flush? @hands[p][i] and is_royal? @hands_n[p][i]
+					if @reasons[i] != "royal_flush" then
+						@reasons[i] = "royal_flush"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
 			i = i+1
 		end
 
@@ -176,7 +188,7 @@ class ScoreController < ApplicationController
 		if @highs[1][turn] > @highs[2][turn] then 1 else 2 end
 	end
 
-	def is_straight?(hand)    
+	def is_straight?(hand)   
 	  sorted = hand.uniq.sort
 	  if sorted.length < 5
 	    # cant form a straight with duplicates
@@ -188,6 +200,18 @@ class ScoreController < ApplicationController
 	    	if sorted.first + 4 == sorted.last then true end
 	    end
 	  end
+	end
+
+	def is_royal?(hand)
+		sorted = hand.uniq.sort
+	  if sorted.length < 5
+	    # cant form a straight with duplicates
+	    false
+	  else
+  		if sorted.first == 10 then
+  			if sorted.first + 4 == sorted.last then true end
+  		end
+		end
 	end
 
 	def get_pairs_for duplicate_hand_table
