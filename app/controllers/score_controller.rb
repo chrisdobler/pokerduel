@@ -3,29 +3,28 @@ class ScoreController < ApplicationController
 	@highs
 	@contents
 
-	def evaluate
+	def parse hands_db
+		@players = 2
+		file = File.open(hands_db, "r")
 
-		players = 2
-		file = File.open("db/hands_db.txt", "r")
+		@hands = {} # array of all hands hashed per player
+		@hands_n = {} # array of numerical values of cards hashed for each player
 
-		hands = {} # array of all hands hashed per player
-		hands_n = {} # array of numerical values of cards hashed for each player
-
-		scores = []
-		reasons = [] #array of reasons for the score outcome with each turn. format: includes: flush
+		@scores = []
+		@reasons = [] #array of reasons for the score outcome with each turn. format: includes: flush
 		i = 0
 		@contents = []
 
 		@highs = {} # array of highest hand for each turn
 
-		pairs = {} # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
+		@pairs = {} # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
 
 		p=1
-		while p <= players
-			hands[p] = []
-			hands_n[p] = []
+		while p <= @players
+			@hands[p] = []
+			@hands_n[p] = []
 			@highs[p] = []
-			pairs[p] = []
+			@pairs[p] = []
 			p +=1
 		end
 
@@ -33,67 +32,70 @@ class ScoreController < ApplicationController
 			line = file.readline
 			cards = line.split(" ")
 
-			hands[1].push cards[0..4]
-			hands[2].push cards[5..9]
+			@hands[1].push cards[0..4]
+			@hands[2].push cards[5..9]
 
-		  hands_n[1].push get_number_value_for hands[1][i]
-		  hands_n[2].push get_number_value_for hands[2][i]
+		  @hands_n[1].push get_number_value_for @hands[1][i]
+		  @hands_n[2].push get_number_value_for @hands[2][i]
 
 	  #check for highest number card
-			@highs[1].push get_highest_from hands_n[1][i]
-			@highs[2].push get_highest_from hands_n[2][i]
+			@highs[1].push get_highest_from @hands_n[1][i]
+			@highs[2].push get_highest_from @hands_n[2][i]
 
 		#check for pairs, double pairs and triples
-			pairs[1].push get_pairs_for get_duplicate_table_for hands_n[1][i]
-			pairs[2].push get_pairs_for get_duplicate_table_for hands_n[2][i]
+			@pairs[1].push get_pairs_for get_duplicate_table_for @hands_n[1][i]
+			@pairs[2].push get_pairs_for get_duplicate_table_for @hands_n[2][i]
 
 			i = i+1
 		end
+	end
+
+	def evaluate
 
 #loop to handle scoring for each set of hands
 		i = 0
-		while i < hands[1].count
+		while i < @hands[1].count
 
 		#set defaults
-			reasons[i] = "unscored"
-			scores[i] = 0
+			@reasons[i] = "unscored"
+			@scores[i] = 0
 
 		#update score for highest card
-			reasons[i] = "highest"
-			scores[i] = get_highest_for(i)
+			@reasons[i] = "highest"
+			@scores[i] = get_highest_for(i)
 
 		#update score for pairs
 			p=1
-			while p <= players
-				if pairs[p][i][:pair] == 1 then
-					if reasons[i] != "pair" then
-						reasons[i] = "pair"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if @pairs[p][i][:pair] == 1 then
+					if @reasons[i] != "pair" then
+						@reasons[i] = "pair"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
 
 		#updates score for two pairs
 			p=1
-			while p <= players
-				if pairs[p][i][:pair] == 2 then
-					if reasons[i] != "two_pair" then
-						reasons[i] = "two_pair"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if @pairs[p][i][:pair] == 2 then
+					if @reasons[i] != "two_pair" then
+						@reasons[i] = "two_pair"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
 
 		#update score for 3ofaKind
 			p=1
-			while p <= players
-				if pairs[p][i][:triple] == 1 then
-					if reasons[i] != "3_of_kind" then
-						reasons[i] = "3_of_kind"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if @pairs[p][i][:triple] == 1 then
+					if @reasons[i] != "3_of_kind" then
+						@reasons[i] = "3_of_kind"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
@@ -101,60 +103,60 @@ class ScoreController < ApplicationController
 
 		#update score for straight matches
 			p=1
-			while p <= players
-				if is_straight? hands_n[p][i] 
-					if reasons[i] != "straight" then
-						reasons[i] = "straight"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if is_straight? @hands_n[p][i] 
+					if @reasons[i] != "straight" then
+						@reasons[i] = "straight"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
 
 		#update score for flushes: All cards of the same suit.
 			p=1
-			while p <= players
-				if is_flush? hands[p][i]
-					if reasons[i] != "flush" then
-						reasons[i] = "flush"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if is_flush? @hands[p][i]
+					if @reasons[i] != "flush" then
+						@reasons[i] = "flush"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
 
 		#updates score for full house
 			p=1
-			while p <= players
-				if pairs[p][i][:triple] == 1 && pairs[p][i][:pair] == 1 then
-					if reasons[i] != "full_house" then
-						reasons[i] = "full_house"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if @pairs[p][i][:triple] == 1 && @pairs[p][i][:pair] == 1 then
+					if @reasons[i] != "full_house" then
+						@reasons[i] = "full_house"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
 
 		#updates score for 4 of a kind
 			p=1
-			while p <= players
-				if pairs[p][i][:quad] == 1 then
-					if reasons[i] != "4_of_kind" then
-						reasons[i] = "4_of_kind"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if @pairs[p][i][:quad] == 1 then
+					if @reasons[i] != "4_of_kind" then
+						@reasons[i] = "4_of_kind"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
 
 		#updates score for straight flush: All cards are consecutive values of same suit.
 			p=1
-			while p <= players
-				if is_flush? hands[p][i] and is_straight? hands_n[p][i]
-					if reasons[i] != "straight_flush" then
-						reasons[i] = "straight_flush"
-						scores[i] = p
-					else scores[i] = get_highest_for(i) end
+			while p <= @players
+				if is_flush? @hands[p][i] and is_straight? @hands_n[p][i]
+					if @reasons[i] != "straight_flush" then
+						@reasons[i] = "straight_flush"
+						@scores[i] = p
+					else @scores[i] = get_highest_for(i) end
 				end
 				p +=1
 			end
@@ -162,7 +164,7 @@ class ScoreController < ApplicationController
 			i = i+1
 		end
 
-		@contents = [reasons, scores]
+		@contents = [@reasons, @scores]
 	end
 
 	def is_flush?(hand)
