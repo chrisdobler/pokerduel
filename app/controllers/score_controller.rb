@@ -74,16 +74,6 @@ class ScoreController < ApplicationController
 			if pairs_p1[i][:triple] > pairs_p2[i][:triple] then scores[i]=1 end
 			if pairs_p2[i][:triple] > pairs_p1[i][:triple] then scores[i]=2 end
 
-		#update score for flushes
-			if is_flush? p1[i] 
-				if !is_flush? p2[i] then scores[i] = 1
-				else scores[i] = get_highest_for i end
-			end
-			if is_flush? p2[i] 
-				if !is_flush? p1[i] then scores[i] = 2
-				else scores[i] = get_highest_for i end
-			end
-
 			i = i+1
 		end
 
@@ -107,6 +97,18 @@ class ScoreController < ApplicationController
 				p +=1
 			end
 
+		#update score for flushes: All cards of the same suit.
+			p=1
+			while p <= players
+				if is_flush? hands[p][i]
+					if reasons[i] != "flush" then
+						reasons[i] = "flush"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
 		#updates score for full house
 			p=1
 			while p <= players
@@ -119,7 +121,7 @@ class ScoreController < ApplicationController
 				p +=1
 			end
 
-	#updates score for 4 of a kind
+		#updates score for 4 of a kind
 			p=1
 			while p <= players
 				if pairs[p][i][:quad] == 1 then
