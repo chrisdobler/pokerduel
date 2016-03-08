@@ -13,6 +13,7 @@ class ScoreController < ApplicationController
 
 		p1_n = [] # array of numerical values of cards
 		p2_n = []
+		hands_n = {} # array of numerical values of cards hashed for each player
 
 		scores = []
 		reasons = [] #array of reasons for the score outcome with each turn. format: includes: flush
@@ -44,6 +45,10 @@ class ScoreController < ApplicationController
 		  p1_n.push get_number_value_for p1[i]
 		  p2_n.push get_number_value_for p2[i]
 
+#temp
+			hands_n[1] = p1_n
+			hands_n[2] = p2_n
+
 	  #check for highest number card
 			@highs[1].push get_highest_from p1_n[i]
 			@highs[2].push get_highest_from p2_n[i]
@@ -69,16 +74,6 @@ class ScoreController < ApplicationController
 			if pairs_p1[i][:triple] > pairs_p2[i][:triple] then scores[i]=1 end
 			if pairs_p2[i][:triple] > pairs_p1[i][:triple] then scores[i]=2 end
 
-		#update score for straight matches
-			if is_straight? p1_n[i] 
-				if !is_straight? p2_n[i] then scores[i] = 1
-				else scores[i] = get_highest_for i end
-			end
-			if is_straight? p2_n[i] 
-				if !is_straight? p1_n[i] then scores[i] = 2
-				else scores[i] = get_highest_for i end
-			end
-
 		#update score for flushes
 			if is_flush? p1[i] 
 				if !is_flush? p2[i] then scores[i] = 1
@@ -96,7 +91,23 @@ class ScoreController < ApplicationController
 		i = 0
 		while i < hands[1].count
 
-	#updates score for full house
+		#set defaults
+			reasons[i] = "unscored"
+			scores[i] = 0
+
+		#update score for straight matches
+			p=1
+			while p <= players
+				if is_straight? hands_n[p][i] 
+					if reasons[i] != "straight" then
+						reasons[i] = "straight"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
+		#updates score for full house
 			p=1
 			while p <= players
 				if pairs[p][i][:triple] == 1 && pairs[p][i][:pair] == 1 then
@@ -137,7 +148,6 @@ class ScoreController < ApplicationController
 
 	def is_straight?(hand)    
 	  sorted = hand.uniq.sort
-	  # @contents = sorted
 	  if sorted.length < 5
 	    # cant form a straight with duplicates
 	    false
