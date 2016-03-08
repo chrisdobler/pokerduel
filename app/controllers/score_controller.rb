@@ -66,14 +66,6 @@ class ScoreController < ApplicationController
 			pairs[1] = pairs_p1
 			pairs[2] = pairs_p2
 
-		#update score for pairs
-			if pairs_p1[i][:pair] > pairs_p2[i][:pair] then scores[i]=1 end
-			if pairs_p2[i][:pair] > pairs_p1[i][:pair] then scores[i]=2 end
-
-		#update score for triples
-			if pairs_p1[i][:triple] > pairs_p2[i][:triple] then scores[i]=1 end
-			if pairs_p2[i][:triple] > pairs_p1[i][:triple] then scores[i]=2 end
-
 			i = i+1
 		end
 
@@ -84,6 +76,44 @@ class ScoreController < ApplicationController
 		#set defaults
 			reasons[i] = "unscored"
 			scores[i] = 0
+
+
+		#update score for pairs
+			p=1
+			while p <= players
+				if pairs[p][i][:pair] == 1 then
+					if reasons[i] != "pair" then
+						reasons[i] = "pair"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
+		#updates score for two pairs
+			p=1
+			while p <= players
+				if pairs[p][i][:pair] == 2 then
+					if reasons[i] != "two_pair" then
+						reasons[i] = "two_pair"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
+		#update score for 3ofaKind
+			p=1
+			while p <= players
+				if pairs[p][i][:triple] == 1 then
+					if reasons[i] != "3_of_kind" then
+						reasons[i] = "3_of_kind"
+						scores[i] = p
+					else scores[i] = get_highest_for(i) end
+				end
+				p +=1
+			end
+
 
 		#update score for straight matches
 			p=1
