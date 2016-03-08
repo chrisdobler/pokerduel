@@ -55,6 +55,12 @@ class ScoreController < ApplicationController
 #loop to handle scoring for each set of hands
 		i = 0
 		while i < @hands[1].count
+	#tally scores
+		totals = Hash.new(0)
+		# iterate over the array, counting duplicate entries
+		@scores.each do |v|
+		  totals[v] += 1
+		end
 
 		#set defaults
 			@reasons[i] = "unscored"
