@@ -18,6 +18,7 @@
 	<div class="hand_shelf">
 		<%=render partial: "static_pages/hand", locals: {hand: @hands[1][hand] } %>
 	  <div class="hand_data">
+	  	round <%=hand+1%><br />
 	  	<% if @scores[hand] == 1 %>
 	  		<-- player 1<br />
 	  	<% elsif @scores[hand] == 2 %>
