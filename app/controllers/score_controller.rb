@@ -6,13 +6,9 @@ class ScoreController < ApplicationController
 	def evaluate
 
 		players = 2
-		file = File.open("db/hands_db_test.txt", "r")
-		p1 = [] # array of all hands for player 1
-		p2 = []
-		hands = {} 
+		file = File.open("db/hands_db.txt", "r")
 
-		p1_n = [] # array of numerical values of cards
-		p2_n = []
+		hands = {} # array of all hands hashed per player
 		hands_n = {} # array of numerical values of cards hashed for each player
 
 		scores = []
@@ -20,51 +16,36 @@ class ScoreController < ApplicationController
 		i = 0
 		@contents = []
 
-		@highs = {1=>[],2=>[]} # array of highest hand for each turn
+		@highs = {} # array of highest hand for each turn
 
-		dups_p1 = [] # array of duplicates for each hand
-		dups_p2 = []
+		pairs = {} # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
 
-		pairs_p1 = [] # array of pairs hashes for each hand labeled as :pair, and :triple, :quad
-		pairs_p2 = []
-		pairs = {}
-
-		straights_p1 = [] # array of straights
-		straights_p2 = []
+		p=1
+		while p <= players
+			hands[p] = []
+			hands_n[p] = []
+			@highs[p] = []
+			pairs[p] = []
+			p +=1
+		end
 
    	while !file.eof?
 			line = file.readline
 			cards = line.split(" ")
-			p1.push cards[0..4]
-			p2.push cards[5..9]
 
-#temp
-			hands[1] = p1
-			hands[2] = p2
+			hands[1].push cards[0..4]
+			hands[2].push cards[5..9]
 
-		  p1_n.push get_number_value_for p1[i]
-		  p2_n.push get_number_value_for p2[i]
-
-#temp
-			hands_n[1] = p1_n
-			hands_n[2] = p2_n
+		  hands_n[1].push get_number_value_for hands[1][i]
+		  hands_n[2].push get_number_value_for hands[2][i]
 
 	  #check for highest number card
-			@highs[1].push get_highest_from p1_n[i]
-			@highs[2].push get_highest_from p2_n[i]
-			scores[i] = get_highest_for(i)
-
-		#update the duplicate table
-			dups_p1.push get_duplicate_table_for p1_n[i]
-			dups_p2.push get_duplicate_table_for p2_n[i]
+			@highs[1].push get_highest_from hands_n[1][i]
+			@highs[2].push get_highest_from hands_n[2][i]
 
 		#check for pairs, double pairs and triples
-			pairs_p1.push get_pairs_for dups_p1[i]
-			pairs_p2.push get_pairs_for dups_p2[i]
-
-#temp
-			pairs[1] = pairs_p1
-			pairs[2] = pairs_p2
+			pairs[1].push get_pairs_for get_duplicate_table_for hands_n[1][i]
+			pairs[2].push get_pairs_for get_duplicate_table_for hands_n[2][i]
 
 			i = i+1
 		end
@@ -77,6 +58,9 @@ class ScoreController < ApplicationController
 			reasons[i] = "unscored"
 			scores[i] = 0
 
+		#update score for highest card
+			reasons[i] = "highest"
+			scores[i] = get_highest_for(i)
 
 		#update score for pairs
 			p=1
