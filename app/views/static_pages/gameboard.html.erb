@@ -1,6 +1,6 @@
 <main ng-app="app" ng-controller="CardsCtrl">
 </main>
-<div class="hand_shelf">
+<div class="header_container">
 	<div class="header_shelf"><h3 class="title">Player 1 (Score: <%=@totals[1]%>)</h3></div>
 	<div class="hand_data"><h3 class="title">
   	<% if @totals[1] > @totals[2] %>
@@ -13,22 +13,24 @@
 	</h3></div>
 	<div class="header_shelf"><h3 class="title">Player 2 (Score: <%=@totals[2]%>)</h3></div>
 </div>
-<% hand = 0 %>
-<% @hands[1].each do %>
-	<div class="hand_shelf">
-		<%=render partial: "static_pages/hand", locals: {hand: @hands[1][hand] } %>
-	  <div class="hand_data">
-	  	round <%=hand+1%><br />
-	  	<% if @scores[hand] == 1 %>
-	  		<-- player 1<br />
-	  	<% elsif @scores[hand] == 2 %>
-	  		player 2 --><br />
-	  	<% else %>
-	  		-- tie --<br />
-	  	<% end %>
-	  	<%=@reasons[hand] %>
-	  </div>
-	  <%=render partial: "static_pages/hand", locals: {hand: @hands[2][hand] } %>
-	</div>
-	<% hand=hand+1 %>
-<% end %>
+<div id="hand_container">
+	<% hand = 0 %>
+	<% @hands[1].each do %>
+		<div class="hand_shelf">
+			<%=render partial: "static_pages/hand", locals: {hand: @hands[1][hand] } %>
+		  <div class="hand_data">
+		  	round <%=hand+1%><br />
+		  	<% if @scores[hand] == 1 %>
+		  		<-- player 1<br />
+		  	<% elsif @scores[hand] == 2 %>
+		  		player 2 --><br />
+		  	<% else %>
+		  		-- tie --<br />
+		  	<% end %>
+		  	<%=@reasons[hand] %>
+		  </div>
+		  <%=render partial: "static_pages/hand", locals: {hand: @hands[2][hand] } %>
+		</div>
+		<% hand=hand+1 %>
+	<% end %>
+</div>
