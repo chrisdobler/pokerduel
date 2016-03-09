@@ -136,14 +136,25 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "3_of_kind" then
 							@reasons[i] = "3_of_kind"
 							@scores[i] = p
-						else self.compare(i,max=3) end
+						else 
+							beat = false
+							pl = 1
+							while pl <= @players
+								if @pairs_highest[pl][i][:triple] > @pairs_highest[p][i][:triple] then beat = true end
+								# if @pairs_highest[pl][i][:triple] == @pairs_highest[p][i][:triple] then self.compare(i,max=3) end
+								pl +=1
+							end 
+							if beat == false then
+								@scores[i] = p
+							end
+						end
 					end
 					p +=1
 				end
 			end
 
 
-		#update score for straight matches
+		#update score for straight matches: All cards are consecutive values.
 			if max > 4 then
 				p=1
 				while p <= @players
@@ -151,7 +162,13 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "straight" then
 							@reasons[i] = "straight"
 							@scores[i] = p
-						else self.compare(i,max=4) end
+						else
+							if @hands_n[p][i].max > @hands_n[@scores[i]][i].max then
+								@scores[i] = p
+							elsif @hands_n[p][i].max == @hands_n[@scores[i]][i].max then
+								self.compare(i,max=4) 
+							end
+						end
 					end
 					p +=1
 				end
@@ -165,7 +182,13 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "flush" then
 							@reasons[i] = "flush"
 							@scores[i] = p
-						else self.evaluate(i,max=5) end
+						else 
+							if @highs[p][i] > @highs[@scores[i]][i] then
+								@scores[i] = p
+							elsif @highs[p][i] == @highs[@scores[i]][i] then
+								self.compare(i,max=5)
+							end
+						end
 					end
 					p +=1
 				end
