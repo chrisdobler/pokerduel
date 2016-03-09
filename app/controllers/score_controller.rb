@@ -87,15 +87,11 @@ class ScoreController < ApplicationController
 							@reasons[i] = "pair"
 							@scores[i] = p
 						else 
-							beat = false
-							pl = 1
-							while pl <= @players
-								if @pairs_highest[pl][i][:pair] > @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 1 then beat = true end
-								# if @pairs_highest[pl][i][:pair] == @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 1 then self.compare(i,max=1) end
-								pl +=1
-							end 
-							if beat == false then
+						#check this match against the winner
+							if @pairs_highest[p][i][:pair] > @pairs_highest[@scores[i]][i][:pair] && @pairs[@scores[i]][i][:pair] == 1 then 
 								@scores[i] = p
+							elsif @pairs_highest[p][i][:pair] == @pairs_highest[@scores[i]][i][:pair] && @pairs[@scores[i]][i][:pair] == 1 then 
+								self.compare(i,max=1) 
 							end
 						end
 					end
@@ -112,15 +108,11 @@ class ScoreController < ApplicationController
 							@reasons[i] = "two_pair"
 							@scores[i] = p
 						else
-							beat = false
-							pl = 1
-							while pl <= @players
-								if @pairs_highest[pl][i][:pair] > @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 2 then beat = true end
-								# if @pairs_highest[pl][i][:pair] == @pairs_highest[p][i][:pair] && @pairs[pl][i][:pair] == 2 then self.compare(i,max=1) end
-								pl +=1
-							end 
-							if beat == false then
+						#check this match against the winner
+							if @pairs_highest[p][i][:pair] > @pairs_highest[@scores[i]][i][:pair] && @pairs[@scores[i]][i][:pair] == 2 then 
 								@scores[i] = p
+							elsif @pairs_highest[p][i][:pair] == @pairs_highest[@scores[i]][i][:pair] && @pairs[@scores[i]][i][:pair] == 2 then 
+								self.compare(i,max=2) 
 							end
 						end
 					end
@@ -137,15 +129,11 @@ class ScoreController < ApplicationController
 							@reasons[i] = "3_of_kind"
 							@scores[i] = p
 						else 
-							beat = false
-							pl = 1
-							while pl <= @players
-								if @pairs_highest[pl][i][:triple] > @pairs_highest[p][i][:triple] then beat = true end
-								# if @pairs_highest[pl][i][:triple] == @pairs_highest[p][i][:triple] then self.compare(i,max=3) end
-								pl +=1
-							end 
-							if beat == false then
+						#check this match against the winner
+							if @pairs_highest[p][i][:triple] > @pairs_highest[@scores[i]][i][:triple] then 
 								@scores[i] = p
+							elsif @pairs_highest[p][i][:pair] == @pairs_highest[@scores[i]][i][:pair] then 
+								self.compare(i,max=3) 
 							end
 						end
 					end
@@ -194,7 +182,7 @@ class ScoreController < ApplicationController
 				end
 			end
 
-		#updates score for full house
+		#updates score for full house: Three of a kind and a pair.
 			if max > 6 then
 				p=1
 				while p <= @players
@@ -202,7 +190,13 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "full_house" then
 							@reasons[i] = "full_house"
 							@scores[i] = p
-						else self.evaluate(i,max=6) end
+						else 
+							if @pairs_highest[p][i][:triple] > @pairs_highest[@scores[i]][i][:triple] then
+								@scores[i] = p
+							elsif @pairs_highest[p][i][:triple] == @pairs_highest[@scores[i]][i][:triple]
+								self.compare(i,max=6) 
+							end
+						end
 					end
 					p +=1
 				end
@@ -216,7 +210,13 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "4_of_kind" then
 							@reasons[i] = "4_of_kind"
 							@scores[i] = p
-						else self.evaluate(i,max=7) end
+						else
+							if @pairs_highest[p][i][:quad] > @pairs_highest[@scores[i]][i][:quad] then
+								@scores[i] = p
+							elsif @pairs_highest[p][i][:quad] == @pairs_highest[@scores[i]][i][:quad]
+								self.compare(i,max=7) 
+							end 
+						end
 					end
 					p +=1
 				end
@@ -230,7 +230,14 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "straight_flush" then
 							@reasons[i] = "straight_flush"
 							@scores[i] = p
-						else self.evaluate(i,max=8) end
+						else
+						#search for the highest card comparison to break a dual straight flush
+							if @highs[p][i] > @highs[@scores[i]][i] then
+								@scores[i] = p
+							elsif @highs[p][i] == @highs[@scores[i]][i] then
+								self.compare(i,max=8)
+							end
+						end
 					end
 					p +=1
 				end
@@ -244,7 +251,10 @@ class ScoreController < ApplicationController
 						if @reasons[i] != "royal_flush" then
 							@reasons[i] = "royal_flush"
 							@scores[i] = p
-						else self.evaluate(i,max=9) end
+						else
+						#there is no way to break this type of tie 
+							@scores[i] = 0 
+						end
 					end
 					p +=1
 				end
